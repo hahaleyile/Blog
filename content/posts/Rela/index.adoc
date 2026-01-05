@@ -1,0 +1,358 @@
+---
+title: "Relational Verification On Network"
+categories:
+tags:
+date: 2025-12-31T01:49:11+08:00
+draft: false
+---
+
+These days, I've been spending some time reading the "Relational Network Verification" paper. The concepts inside -- especially the use of automata for verification -- are incredibly interesting. Here are my study notes and takeaways from exploring this technology.
+
+== The Purpose
+
+Network verification typically involves checking whether certain **specifications** are satisfied within a **network topology**, which is determined by the **network configurations**. However, **Relational Network Verification** is quite different. Understanding its purpose is crucially important to grasp the technology itself.
+
+At first, I thought this tech only collected the "deltas" (differential parts) between network configurations and verified specifications based on these differences. This understanding stemmed from the idea that the network topologies grow increasingly complex while the changes are often quite small. **But this idea is totally wrong.** relational network verification **completely** records the network configurations before and after the change. Its main purpose is **not** just to verify some specifications hold true, but to verify that other existing behaviors have not changed, thereby avoiding **collateral damage**.
+
+.Motivation in the paper
+[#example1]
+====
+Suppose we want to modify the following network, moving traffic __A1-B1-B2-B3-D1__ to __A1-A2-A3-D1__. Meanwhile, no other traffic should be impacted, for example the traffic __C1-B1-B2-B3-D1__ should be preserved.
+
+.Network topology
+[tikz]
+....
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{positioning, fit, backgrounds, calc, shapes.arrows}
+\usepackage[active,tightpage]{preview}
+\PreviewEnvironment{tikzpicture}
+\setlength\PreviewBorder{0.125pt}
+\begin{document}
+\begin{tikzpicture}[
+    router/.style={circle, draw, thick, minimum size=1cm, inner sep=0pt, font=\sffamily\bfseries},
+    % pathsolid/.style={draw=cyan!60!blue, line width=3pt, -latex},
+    link/.style={thick},
+]
+
+\node[router] (A1) at (0, 2) {A1};
+\node[router] (A2) at (3, 2) {A2};
+\node[router] (A3) at (6, 2) {A3};
+
+\node[router] (B1) at (0, 0) {B1};
+\node[router] (B2) at (3, 0) {B2};
+\node[router] (B3) at (6, 0) {B3};
+
+\node[router] (C1) at (0, -2) {C1};
+\node[router] (C2) at (3, -2) {C2};
+
+\node[router] (D1) at (9, 0) {D1};
+
+\draw[link] (A1) -- (A2);
+\draw[link] (A2) -- (A3);
+\draw[link] (A3) -- (D1);
+
+\draw[link] (B1) -- (B2);
+\draw[link] (B2) -- (B3);
+\draw[link] (B3) -- (D1);
+
+\draw[link] (C1) -- (C2);
+\draw[link] (C2) -- (D1);
+
+\draw[link] (A1) -- (B1);
+\draw[link] (B1) -- (C1);
+\draw[link] (A3) -- (B3);
+
+\draw[thick, dashed] (B1) -- +(-1.5, 0);
+\draw[thick, dashed] (D1) -- +(1.5, 0);
+
+\draw[thick] (A1) -- +(-1.5, 0);
+\draw[thick] (C1) -- +(-1.5, 0);
+
+% \draw[pathsolid] (A1.center) -- (B1.center) -- (B2.center) -- (B3.center) -- (D1.center);
+
+\end{tikzpicture}
+\end{document}
+....
+====
+
+In <<example1>>, to achieve this goal, an engineer might lower the routing priority of node B, forcing traffic from A1 to D1 to route through A2. However, lowering B1's priority could unintendedly cause traffic from C1 to D1 to route through C2.
+
+In traditional network verification, verifying the intended change is easy -- one can simply write a spec ensuring all `A1(.*)D1` traffic follows __A1-A2-A3-D1__. However, without the pre-change network topology as a baseline, verifying the rest of the network topology remains unaffected is challenging. Yes, we can check the spec like `C1B1B2B3D1` to ensure this traffic still exists, but we can't list all the traffic in a network -- it's too enormous. Especially when B1 is a backbone node, modifying it can impact thousands of traffic flows.
+
+[NOTE]
+====
+By utilizing relational network verification, we can create simple and concise specifications, to check that the changed network topology maintains the desired relationship with the original one.
+====
+
+
+== Network Change
+
+An important thing in verification is how we describe the network topology to validate that changes satisfy specifications. Much like defining a set in mathematics, we can describe a network using either an extensional or an intensional approach.
+
+**Extensionally**, a network is defined by all the traffic flows passing through it. **Intensionally**, it is defined by the network configurations and routing relations that constrain how packets move between nodes.
+
+.An example network topology case
+[#example2]
+====
+Consider a scenario, where the pre-change network has traffic __r1-r2-r3__. After the change, an additional path __r1-r4-r3__ is introduced. These network topologies can be explicitly represented in the following code:
+
+[source,py]
+.test_verification.py#L62
+----
+before_paths = [['r1', 'r2', 'r3']]
+after_paths = [['r1', 'r2', 'r3'], ['r1', 'r4', 'r3']]
+...
+SimpleNC.from_single_fec(before_paths, after_paths)
+----
+====
+
+
+Here is an observation from the code in <<example2>>: network paths are identical to strings. Therefore, according to the automata theory, all the accepted strings can be represented by an automaton. Thus, the networks described in <<example2>> can be visualized as the following automata:
+
+
+.Automaton of the pre-change network
+[graphviz#automaton1]
+....
+digraph G { 
+    rankdir="LR"
+    node [fontname="Tahoma",shape=circle,fontsize=14,fixedsize=true,fillcolor="grey",style=filled]
+    edge [fontname="FreeMono",fontsize=14]
+    0 [label="0"];
+    0 -> 1 [label="r1"];
+    1 [label="1"];
+    1 -> 2 [label="r2"];
+    2 [label="2"];
+    2 -> 3 [label="r3"];
+    3 [label="3",shape=doublecircle];
+}
+....
+
+
+.Automaton of the post-change network
+[graphviz#automaton2]
+....
+digraph G { 
+    rankdir="LR"
+    node [fontname="Tahoma",shape=circle,fontsize=14,fixedsize=true,fillcolor="grey",style=filled]
+    edge [fontname="FreeMono",fontsize=14]
+    0 [label="0"];
+    0 -> 1 [label="r1"];
+    1 [label="1"];
+    1 -> 2 [label="r2"];
+    1 [label="1"];
+    1 -> 2 [label="r4"];
+    2 [label="2"];
+    2 -> 3 [label="r3"];
+    3 [label="3",shape=doublecircle];
+}
+....
+
+// TEC
+
+== Specification
+
+Now, let's take a deeper look at relational network verification. Since the network paths can be viewed as strings, then network changes naturally apply **string rewriting rules** to them. The specification itself checks the relation between pre-strings and post-strings. Therefore, the set of rewriting rules is the main part of the **change intent**, which **IS** the specification.
+
+Regular expression substitution is a standard method for string rewriting. Recall that this process involves two steps: first matching a specific pattern, and then applying a transformation to the matched content. This structure directly corresponds to the two core components of Rela's grammar. Similarly, Rela identifies the parts to be changed, defined as **Change Zones**, and then specifies the desired **modifiers** to apply. So, `zone : modifier` is the **atomic specification**, and complex specs are composed by atomic ones recursively. We can see detailed syntax in BNF form in Figure 2 of the paper.
+
+[NOTE]
+====
+Rela uses a special operator `>>` to concisely express multiple specifications. It acts just like pattern matching: rules are checked in order, and the first match applies.
+====
+
+.An example change specification case
+[#example3]
+====
+The network change observed in <<example2>> corresponds to the following change intent, which can be represented by this specification:
+
+
+    spec load_balance := {
+        .* : preserve;
+        r1.*r3 : replace(r2, r2 | r4);
+        .* : preserve;
+    }
+
+    spec nochange := { .* : preserve; }
+    spec change := load_balance >> nochange
+====
+
+== Verification
+
+Since specs function as regex substitution, they formally define regular relations, which can be represented by **Finite-State Transducers (FSTs)** as well. As a result, the expected post-change network can be derived by composing the pre-change network automaton with the change spec transducer. This resulting automaton accepts all the traffic expected after the modification. The verification process simply checks whether the **actual** post-change automaton holds a specific relationship (equivalence or subset) with this **expected** automaton.
+
+[IMPORTANT]
+====
+Yes, relational network verification just validates a simple automata relation: `Relation(preState >> change, postState)`.
+====
+
+// **Yes, relational network verification just validates a simple automata relation: `Relation(preState >> change, postState)`.**
+
+// === RIR And Transducer Operation
+
+In addition to the high-level syntax (defined as BNF form) designed for engineer readability, the paper also introduces a **Regular Intermediate Representation (RIR)** and the compilation process between them. This regular relation form can be easily transformed into transducers, facilitating further verification. In the implementation, Rela uses the Prop, Rel, and Spec classes to represent strings, rewriting rules and the relation between strings.
+
+I believe many people, like me, are quite familiar with automata operations but less so with transducers. Below, I'll briefly explain the principles behind some core operations.
+
+=== Union
+
+The union of two specifications represents a logical disjunction: satisfying either specification is valid. For example, given rewriting rules stem:[T_1: a \to Abe] and stem:[T_2: a \to Acd], rewriting stem:[a] into either stem:[Abe] or stem:[Acd] is acceptable.
+
+From the transducer perspective, the new transducer is constructed by introducing a new start state and adding stem:[\epsilon]-transitions that connect it to the original start states of both component transducers.
+
+=== Compose
+
+The compose operation is analogous to function composition. It chains two transducers together, feeding the output of the first transducer directly into the input of the second. Consequently, a transition is valid only when the output string of the first matches the input string of the second.
+
+From the transducer perspective, the new composed transducer is constructed by moving both transducers forward simultaneously step-by-step, checking for matching symbols at each transition to determine valid states.
+
+.The first transducer to compose
+[graphviz#transducer1]
+....
+digraph T1 {
+    rankdir="LR"
+    
+    node [fontname="Tahoma", shape=circle, fontsize=14, fixedsize=true, width=0.6, style=filled, fillcolor="lightgrey"]
+    edge [fontname="FreeMono", fontsize=14, arrowsize=0.8]
+
+    0 [label="0"];
+    1 [label="1"];
+
+    node [shape=doublecircle, fillcolor="lightblue"];
+    2 [label="2"];
+    3 [label="3"];
+    9 [label="9"];
+
+    0 -> 1 [label="a:A"];
+    0 -> 9 [label="k:K"];
+    1 -> 2 [label="b:B"];
+    1 -> 3 [label="c:C"];
+}
+....
+
+.The second transducer to compose
+[graphviz#transducer2]
+....
+digraph T2 {
+    rankdir="LR"
+    
+    node [fontname="Tahoma", shape=circle, fontsize=14, fixedsize=true, width=0.6, style=filled, fillcolor="lightgrey"]
+    edge [fontname="FreeMono", fontsize=14, arrowsize=0.8]
+
+    S [label="S"];
+    P [label="P"];
+
+    node [shape=doublecircle, fillcolor="lightblue"];
+    Q [label="Q"];
+    R [label="R"];
+
+    S -> P [label="A:1"];
+    P -> Q [label="B:2"];
+    P -> R [label="D:4"];
+}
+....
+
+For example, to compose transducers shown in <<transducer1>> and <<transducer2>>, we begin at their respective start states, `0` and `S`. We then evaluate the transitions from these states: 
+
+. Transducer 1 transitions from `0` to `1` with output A, from `0` to `9` with output k.
+
+. Transducer 2 transitions from `S` to `P` with input A.
+
+We observe that `(1, P)` is a valid state but `(9, P)` is not valid. Next, we repeat the process starting from the new states `1` and `P`. <<transducer3>> shows the final composed result.
+
+.The composed transducer
+[graphviz#transducer3]
+....
+digraph Result {
+    rankdir="LR"
+    
+    node [fontname="Tahoma", shape=circle, fontsize=14, fixedsize=true, width=0.6, style=filled, fillcolor="lightgrey"]
+    edge [fontname="FreeMono", fontsize=14, arrowsize=0.8]
+
+    Start [label="(0,S)"];
+    
+    Mid [label="(1,P)"];
+
+    node [shape=doublecircle, fillcolor="lightblue"];
+    End [label="(2,Q)"];
+
+    Start -> Mid [label="a:1"];
+    Mid -> End   [label="b:2"];
+}
+....
+
+This step-by-step composition algorithm works because the transducers in our example exhibit an 1:1 input-output correspondence, ensuring perfect alignment at each step. In cases of variable-length matching, we can handle this by introducing stem:[\epsilon]-transitions. This effectively "normalizes" the transducers into a form where each transition handles a single symbol (or stem:[\epsilon]) before the composition is performed.
+
+[NOTE]
+=====
+In relational network verification, this operation is crucial to derive the expected post-change network. The pre-change network (FSA) is composed with the change specifications (FST), which is called the image operation.
+
+[source,py]
+.utils.py#L129
+----
+def fst_image(p: hfst.HfstTransducer, r: hfst.HfstTransducer) -> hfst.HfstTransducer:
+    """
+    Construct the FSA that represents the image of the given FSA under the 
+    given relation.
+    """
+    p0 = p.copy()
+    p0.compose(r)
+    p0.output_project()
+    return p0
+----
+=====
+
+=== Priority Union
+
+The Priority Union is not just a simple union, it is the underlying logic for the special operator `>>`. Similar to pattern matching, the first specification takes precedence: inputs matching the first spec are handled immediately. The second spec is applied only to inputs that the first spec does not cover.
+
+From the transducer perspective, the construction is significantly more complex. It typically requires **Complement** and **Composition** operations to derive the final result. Details are not discussed here.
+
+=== Verification Example
+
+Let's verify whether the network change in <<example2>> satisfies the specification defined in <<example3>>. The change specification can be expressed in the regular form: `(.*)(r2 x (r2 + r4))(.*)`.
+
+After compiling this into a Finite State Transducer (which is too complex to display here), we can compose the pre-change automaton from <<automaton1>> with it. This operation yields a new automaton (<<automaton3>>) representing the expected post-change network.
+
+If we compare this result with the automaton in <<automaton2>>, either by observation, computing the **Minimal DFA**, or using the **Product Construction** method, we see they are identical. Thus, the specification is satisfied.
+
+.Automaton of the expected post-change network
+[graphviz#automaton3]
+....
+digraph Result {
+    rankdir="LR"
+    
+    node [fontname="Tahoma",shape=circle,fontsize=14,fixedsize=true,fillcolor="grey",style=filled]
+    edge [fontname="FreeMono",fontsize=14]
+
+    0 [label="0"];
+    0 -> 1 [label="r1:r1"];
+    1 [label="1"];
+    1 -> 2 [label="r2:r2"];
+    1 [label="1"];
+    1 -> 3 [label="r4:r4"];
+    1 [label="1"];
+    1 -> 4 [label="ε:ε"];
+    1 [label="1"];
+    1 -> 5 [label="r2:r2"];
+    1 [label="1"];
+    1 -> 6 [label="r4:r4"];
+    2 [label="2"];
+    2 -> 5 [label="ε:ε"];
+    3 [label="3"];
+    3 -> 6 [label="ε:ε"];
+    4 [label="4"];
+    4 -> 5 [label="r2:r2"];
+    4 [label="4"];
+    4 -> 6 [label="r4:r4"];
+    5 [label="5"];
+    5 -> 7 [label="r3:r3"];
+    6 [label="6"];
+    6 -> 7 [label="r3:r3"];
+    7 [label="7",shape=doublecircle];
+}
+....
+
+== Similar Work
+
+Recently, I learned about a fascinating work from Tsinghua University during a software analysis conference. This work focuses on modeling P4 programs using LTL to verify specifications. Similar to the approach discussed in this post, they leverage automata to detect violations and generate counterexamples. I intend to investigate this work more deeply in subsequent posts.

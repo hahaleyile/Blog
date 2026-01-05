@@ -1,7 +1,7 @@
-baseURL: https://hahaleyile.github.io/hugo-PaperMod-asciidoc/
-defaultContentLanguage: zh
+baseURL: https://hahaleyile.github.io/Blog/
+defaultContentLanguage: en
 hasCJKLanguage: true
-title: 我的博客
+title: Blog
 theme: hugo-PaperMod
 
 taxonomies:
@@ -35,45 +35,46 @@ markup:
     verbose: false
     workingFolderCurrent: true
     attributes:
+      xrefstyle: short
       skip-front-matter: ""
       source-highlighter: highlight.js
-      lang: zh
+      lang: en
       toc: ""
       icons: font
-      stem: asciimath
+      stem: latexmath
       diagram-server-url: https://kroki.io/
       diagram-server-type: kroki_io
       diagram-format: svg
-      appendix-caption: 附录
-      appendix-refsig: 附录
-      caution-caption: 注意
-      example-caption: 示例
-      figure-caption: 图表
-      important-caption: 重要
-      last-update-label: 最后更新
+      # appendix-caption: 附录
+      # appendix-refsig: 附录
+      # caution-caption: 注意
+      # example-caption: 示例
+      # figure-caption: 图表
+      # important-caption: 重要
+      # last-update-label: 最后更新
       # listing-caption: 代码
       listing-caption!:
-      manname-title: 名称
-      note-caption: 笔记
-      preface-title: 序言
-      table-caption: 表格
-      tip-caption: 提示
-      toc-title: 目录
-      untitled-label: 暂无标题
-      version-label: 版本
-      warning-caption: 警告
+      # manname-title: 名称
+      # note-caption: 笔记
+      # preface-title: 序言
+      # table-caption: 表格
+      # tip-caption: 提示
+      # toc-title: 目录
+      # untitled-label: 暂无标题
+      # version-label: 版本
+      # warning-caption: 警告
 menu:
   main:
     - identifier: categories
-      name: 分类 
+      name: Categories
       url: /categories/
       weight: 10
     - identifier: tags
-      name: 标签
+      name: Tags
       url: /tags/
       weight: 20
     - identifier: archives 
-      name: 存档 
+      name: Archive
       url: /archives/
       weight: 30
     - identifier: rss

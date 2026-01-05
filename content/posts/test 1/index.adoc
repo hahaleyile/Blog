@@ -1,18 +1,20 @@
 ---
-title: "样式测试"
+title: "Style Test 1"
 categories:
-- "测试"
+- "Test"
 tags:
-- "测试"
-- "样式"
+- "Test"
+- "Style"
 date: 2023-01-06T03:13:23+08:00
 draft: false
 ---
-= 测试
+== English Paragraphs
 
-乔姆斯基在研究语言的过程中，从产生语言的角度发现了一种模型用来描述语言，它就是文法。
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam eu commodo erat. Fusce sed erat dapibus ipsum imperdiet iaculis. Vestibulum eu lacus iaculis tellus finibus elementum. Donec in mauris id lorem luctus cursus. Vivamus maximus metus id mi ultrices scelerisque. Proin a tortor nibh. Etiam vitae dolor velit. In eu commodo nisi. Curabitur non sem vitae nisi ultrices molestie. Fusce posuere augue ac tellus venenatis, a sagittis risus iaculis.
 
-== 文本格式化
+Aliquam mattis turpis est, vitae vestibulum turpis consectetur nec. Maecenas efficitur sodales elit, sed sodales quam consectetur eu. Morbi eleifend efficitur metus at feugiat. Sed id ex est. Morbi volutpat rhoncus ante in iaculis. Quisque ultricies purus metus, vel tincidunt ante euismod vitae. Mauris lobortis dictum mi nec porttitor. Ut dolor sapien, molestie nec diam vitae, ultrices varius felis. Curabitur ullamcorper dolor sed augue dignissim mollis quis eget mauris. Etiam lacinia nulla turpis, nec pretium nulla porta non. Integer gravida, libero et ultricies eleifend, justo tellus ornare est, eget vestibulum odio lacus et dui.
+
+== Text Formatting
 
 
 normal, _italic_, *bold*, +mono+.
@@ -661,12 +663,12 @@ Back-to-back with previous interval.
 
 == 数学公式
 
-构造产生语言 stem:[{a^nb^nc^n| n>=1}] 的文法。
+构造产生语言 asciimath:[{a^nb^nc^n| n>=1}] 的文法。
 
 解：这个语言实际上是一个上下文有关语言 CSL，它不能用上下文无关文法表示。
-如果将 stem:[a^nb^n] 和 stem:[c^n] 分开表示，即构造文法如下：
+如果将 asciimath:[a^nb^n] 和 asciimath:[c^n] 分开表示，即构造文法如下：
 
-[stem]
+[asciimath]
 ++++
 G->AB
 
@@ -675,18 +677,18 @@ A->aAb|ab
 B->cB|c
 ++++
 
-则它只能表示语言 stem:[{a^nb^nc^m|n>=1,m>=1}]，因为不在同一产生式的递归推导终结符，无法保证终结符的个数相同。
+则它只能表示语言 asciimath:[{a^nb^nc^m|n>=1,m>=1}]，因为不在同一产生式的递归推导终结符，无法保证终结符的个数相同。
 只有递归表示位于同一产生式中，才能保证该产生式中的符号是同个数的。
 因此可以考虑将语言分成三部分：
 
-[stem]
+[asciimath]
 ++++
 G->aABC | aBC
 ++++
 
-这样 a、B、C 出现的个数相同，可惜此字符串是以 stem:[aa cdots a BCBC cdots BC] 形式出现的，因此我们需要添加产生式，调整非终结符的顺序：
+这样 a、B、C 出现的个数相同，可惜此字符串是以 asciimath:[aa cdots a BCBC cdots BC] 形式出现的，因此我们需要添加产生式，调整非终结符的顺序：
 
-[stem]
+[asciimath]
 ++++
 CB->BC
 ++++
@@ -695,7 +697,7 @@ CB->BC
 
 最后，只有处于正确位置的 B、C 才能推导为终结符：
 
-[stem]
+[asciimath]
 ++++
 aB->ab
 
