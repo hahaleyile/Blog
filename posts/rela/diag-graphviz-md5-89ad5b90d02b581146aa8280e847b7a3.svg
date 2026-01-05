@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg height='158pt' preserveAspectRatio='xMidYMid meet' viewBox='0.00 0.00 275.10 158.20' width='275pt' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns='http://www.w3.org/2000/svg'>
+<g class='graph' id='graph0' transform='scale(1 1) rotate(0) translate(4 154.2)'>
+<title>T1</title>
+<polygon fill='white' points='-4,4 -4,-154.2 271.1,-154.2 271.1,4 -4,4' stroke='none'/>
+
+<g class='node' id='node1'>
+<title>0</title>
+<ellipse cx='21.6' cy='-43.6' fill='lightgrey' rx='21.6' ry='21.6' stroke='black'/>
+<text font-family='Tahoma' font-size='14.00' text-anchor='middle' x='21.6' y='-38.92'>0</text>
+</g>
+
+<g class='node' id='node2'>
+<title>1</title>
+<ellipse cx='129.55' cy='-90.6' fill='lightgrey' rx='21.6' ry='21.6' stroke='black'/>
+<text font-family='Tahoma' font-size='14.00' text-anchor='middle' x='129.55' y='-85.92'>1</text>
+</g>
+
+<g class='edge' id='edge1'>
+<title>0&#45;&gt;1</title>
+<path d='M41.54,-52C58.01,-59.31 82.09,-69.99 100.75,-78.27' fill='none' stroke='black'/>
+<polygon fill='black' points='99.58,-80.81 108.03,-81.5 101.85,-75.69 99.58,-80.81' stroke='black'/>
+<text font-family='FreeMono' font-size='14.00' text-anchor='middle' x='73.57' y='-71.55'>a:A</text>
+</g>
+
+<g class='node' id='node5'>
+<title>9</title>
+<ellipse cx='129.55' cy='-25.6' fill='lightblue' rx='21.6' ry='21.6' stroke='black'/>
+<ellipse cx='129.55' cy='-25.6' fill='none' rx='25.6' ry='25.6' stroke='black'/>
+<text font-family='Tahoma' font-size='14.00' text-anchor='middle' x='129.55' y='-20.92'>9</text>
+</g>
+
+<g class='edge' id='edge2'>
+<title>0&#45;&gt;9</title>
+<path d='M43.28,-40.09C57.91,-37.6 77.86,-34.21 94.79,-31.34' fill='none' stroke='black'/>
+<polygon fill='black' points='94.92,-34.15 102.33,-30.05 93.98,-28.63 94.92,-34.15' stroke='black'/>
+<text font-family='FreeMono' font-size='14.00' text-anchor='middle' x='73.57' y='-38.55'>k:K</text>
+</g>
+
+<g class='node' id='node3'>
+<title>2</title>
+<ellipse cx='241.5' cy='-124.6' fill='lightblue' rx='21.6' ry='21.6' stroke='black'/>
+<ellipse cx='241.5' cy='-124.6' fill='none' rx='25.6' ry='25.6' stroke='black'/>
+<text font-family='Tahoma' font-size='14.00' text-anchor='middle' x='241.5' y='-119.92'>2</text>
+</g>
+
+<g class='edge' id='edge3'>
+<title>1&#45;&gt;2</title>
+<path d='M150.72,-96.84C166.63,-101.76 189.15,-108.72 207.65,-114.44' fill='none' stroke='black'/>
+<polygon fill='black' points='206.72,-117.08 215.19,-116.77 208.37,-111.73 206.72,-117.08' stroke='black'/>
+<text font-family='FreeMono' font-size='14.00' text-anchor='middle' x='185.52' y='-111.55'>b:B</text>
+</g>
+
+<g class='node' id='node4'>
+<title>3</title>
+<ellipse cx='241.5' cy='-55.6' fill='lightblue' rx='21.6' ry='21.6' stroke='black'/>
+<ellipse cx='241.5' cy='-55.6' fill='none' rx='25.6' ry='25.6' stroke='black'/>
+<text font-family='Tahoma' font-size='14.00' text-anchor='middle' x='241.5' y='-50.92'>3</text>
+</g>
+
+<g class='edge' id='edge4'>
+<title>1&#45;&gt;3</title>
+<path d='M150.46,-84.26C166.45,-79.17 189.23,-71.92 207.87,-65.99' fill='none' stroke='black'/>
+<polygon fill='black' points='208.7,-68.66 215.47,-63.57 207,-63.33 208.7,-68.66' stroke='black'/>
+<text font-family='FreeMono' font-size='14.00' text-anchor='middle' x='185.52' y='-76.55'>c:C</text>
+</g>
+</g>
+</svg>
